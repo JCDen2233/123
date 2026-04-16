@@ -42,16 +42,52 @@
         <button id="btnWater" class="tool-btn">Water</button>
         <span id="toolStatus">Select tool</span>
     </div>
+    <div id="gameUI">
+        <!-- Инвентарь -->
+        <div id="inventoryContainer" class="ui-panel hidden">
+            <h3>Инвентарь</h3>
+            <div id="inventoryGrid"></div>
+            <div id="hotbarGrid"></div>
+        </div>
+        
+        <!-- Журнал квестов -->
+        <div id="questLogContainer" class="ui-panel hidden">
+            <h3>Квесты</h3>
+            <div id="questList"></div>
+        </div>
+        
+        <!-- Диалоговое окно -->
+        <div id="dialogueContainer" class="ui-panel hidden">
+            <div id="dialogueName"></div>
+            <div id="dialogueText"></div>
+            <div id="dialogueOptions"></div>
+            <button id="closeDialogue">Закрыть</button>
+        </div>
+        
+        <!-- Уведомления -->
+        <div id="notifications"></div>
+        
+        <!-- Эффекты урона -->
+        <div id="damageOverlay" class="hidden"></div>
+        <div id="deathScreen" class="hidden">
+            <h2>ВЫ ПОГИБЛИ</h2>
+            <p>Возрождение через <span id="respawnTimer">5</span> сек...</p>
+        </div>
+    </div>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
     <script src="/static/js/heightmap.js"></script>
     <script src="/static/js/terrainBuilder.js"></script>
     <script src="/static/js/iso.js"></script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/entities.js"></script>
+    <script src="/static/js/entities_extra.js"></script>
+    <script src="/static/js/inventory.js"></script>
     <script src="/static/js/input.js"></script>
     <script src="/static/js/camera.js"></script>
     <script src="/static/js/renderer.js"></script>
     <script src="/static/js/network.js"></script>
+    <script src="/static/js/hud.js"></script>
+    <script src="/static/js/game_extra.js"></script>
     <script src="/static/js/game.js"></script>
 </body>
 </html>

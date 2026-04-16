@@ -6,6 +6,7 @@ class NetworkManager {
         this.remotePlayers = new Map();
         this.stateCallback = null;
         this.initCallback = null;
+        this.chatCallback = null;
         this.terrainUpdateCallback = null;
     }
 
@@ -29,8 +30,15 @@ class NetworkManager {
             }
         });
 
-        this.socket.on("state", (data) => {
-            if (this.stateCallback) {
+        this.socket.on(\"state\", (data) => {
+            // Обновление HP локального игрока
+            if (this.stateCallback && data.players) {
+                const localPlayerData = data.players.find(p => p.id === this.myPlayerId);
+                if (localPlayerData && typeof localPlayerData.hp !== 'undefined') {
+                    // Сохраняем HP для отображения в HUD
+                    window.localPlayerHP = localPlayerData.hp;
+                    window.localPlayerMaxHP = localPlayerData.max_hp || 100;
+                }
                 this.stateCallback(data);
             }
         });

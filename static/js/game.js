@@ -5,6 +5,7 @@ const renderer = new Renderer(canvas, ctx);
 const camera = new Camera();
 const inputHandler = new InputHandler();
 const network = new NetworkManager();
+const hud = new HUDManager(canvas);
 
 let localPlayer = null;
 let remotePlayers = new Map();
@@ -34,6 +35,23 @@ const btnHill = document.getElementById("btnHill");
 const btnPit = document.getElementById("btnPit");
 const btnWater = document.getElementById("btnWater");
 const toolStatus = document.getElementById("toolStatus");
+
+// Игровые системы Этапа 5
+let inventory = null;
+let questLog = [];
+let currentDialogue = null;
+let isDead = false;
+let respawnTimer = 0;
+let attackCooldown = 0;
+const ATTACK_COOLDOWN_TIME = 0.5;
+const RESPAWN_TIME = 5;
+
+// Менеджер сущностей
+const entityManager = new EntityManager();
+
+// Горячие клавиши для быстрого доступа
+const hotbarSlots = [0, 1, 2, 3, 4];
+let selectedHotbarSlot = 0;
 
 function init() {
     window.addEventListener("resize", () => renderer.resize());
@@ -80,18 +98,25 @@ function handleInit(data) {
     
     localPlayer = createPlayerFromData(data.players.find(p => p.id === network.myPlayerId));
     if (localPlayer) {
+        localPlayer.id = network.myPlayerId;
         camera.reset(localPlayer.x, localPlayer.y);
     }
     
     remotePlayers = new Map();
     data.players.forEach(p => {
         if (p.id !== network.myPlayerId) {
-            remotePlayers.set(p.id, createPlayerFromData(p));
+            const player = createPlayerFromData(p);
+            player.id = p.id;
+            remotePlayers.set(p.id, player);
         }
     });
     
     updateEntitiesList();
     isJoined = true;
+    
+    // Инициализация систем Этапа 5
+    initInventory();
+    initTestEntities();
 }
 
 function handleStateUpdate(data) {
@@ -103,6 +128,11 @@ function handleStateUpdate(data) {
                 localPlayer.direction = pData.direction;
                 localPlayer.state = pData.state;
                 localPlayer.frame = pData.frame;
+                // Обновление HP
+                if (typeof pData.hp !== 'undefined') {
+                    localPlayer.hp = pData.hp;
+                    localPlayer.maxHp = pData.max_hp || 100;
+                }
             }
         } else {
             if (remotePlayers.has(pData.id)) {
@@ -112,8 +142,18 @@ function handleStateUpdate(data) {
                 p.direction = pData.direction;
                 p.state = pData.state;
                 p.frame = pData.frame;
+                if (typeof pData.hp !== 'undefined') {
+                    p.hp = pData.hp;
+                    p.maxHp = pData.max_hp || 100;
+                }
             } else {
-                remotePlayers.set(pData.id, createPlayerFromData(pData));
+                const player = createPlayerFromData(pData);
+                player.id = pData.id;
+                if (typeof pData.hp !== 'undefined') {
+                    player.hp = pData.hp;
+                    player.maxHp = pData.max_hp || 100;
+                }
+                remotePlayers.set(pData.id, player);
                 updateEntitiesList();
             }
         }
@@ -151,10 +191,44 @@ function getRandomColor() {
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
+// Обработчики команд чата
+function handleChatCommand(command) {
+    const parts = command.split(' ');
+    const cmd = parts[0].toLowerCase();
+    
+    if (cmd === '/help') {
+        addChatMessage('Система', '#ffffff', 'Доступные команды: /help, /teleport x y');
+    } else if (cmd === '/teleport' && parts.length >= 3) {
+        const x = parseInt(parts[1]);
+        const y = parseInt(parts[2]);
+        if (!isNaN(x) && !isNaN(y) && localPlayer) {
+            // Телепортация будет обработана сервером
+            network.move(x, y, localPlayer.direction, localPlayer.state, localPlayer.frame);
+            addChatMessage('Система', '#ffffff', `Телепортация на ${x}, ${y}`);
+        } else {
+            addChatMessage('Система', '#ff4444', 'Неверные координаты');
+        }
+    } else {
+        addChatMessage('Система', '#ff4444', 'Неизвестная команда. Введите /help для справки.');
+    }
+}
+
+function addChatMessage(nickname, color, message) {
+    const div = document.createElement("div");
+    div.className = "chat-line";
+    div.innerHTML = `<span class="nickname" style="color: ${color}">${nickname}:</span> <span class="message">${escapeHtml(message)}</span>`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
 function sendMessage() {
     const msg = chatInput.value.trim();
     if (msg) {
-        network.sendChat(msg);
+        if (msg.startsWith('/')) {
+            handleChatCommand(msg.substring(1));
+        } else {
+            network.sendChat(msg);
+        }
         chatInput.value = "";
     }
 }
@@ -230,7 +304,7 @@ function updateNetwork() {
 function update(deltaTime) {
     handleInput();
     
-    if (localPlayer) {
+    if (localPlayer && !isDead) {
         localPlayer.update(deltaTime);
         updateNetwork();
         camera.follow(localPlayer, deltaTime);
@@ -238,13 +312,24 @@ function update(deltaTime) {
     }
     
     remotePlayers.forEach(p => p.update(deltaTime));
+    
+    // Обновление систем Этапа 5
+    updateGameExtra(deltaTime);
 }
 
 function render() {
     renderer.clear();
     const offset = camera.getOffset();
     renderer.drawMap(offset);
-    renderer.drawAllEntities(entities, offset);
+    
+    // Отрисовка всех сущностей (игроки + NPC + мобы + предметы)
+    const allEntities = [...entities, ...entityManager.getAllEntities()];
+    renderer.drawAllEntities(allEntities, offset);
+    
+    // Отрисовка HUD
+    if (isJoined && localPlayer) {
+        hud.render(localPlayer, remotePlayers, camera);
+    }
 }
 
 function updateHud() {
