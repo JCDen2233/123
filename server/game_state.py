@@ -22,6 +22,8 @@ class Player:
     frame: int
     hp: int = 100
     max_hp: int = 100
+    inventory: list = field(default_factory=list)
+    quests: list = field(default_factory=list)
 
     def to_dict(self):
         return {
@@ -34,7 +36,9 @@ class Player:
             "state": self.state,
             "frame": self.frame,
             "hp": self.hp,
-            "max_hp": self.max_hp
+            "max_hp": self.max_hp,
+            "inventory": self.inventory,
+            "quests": self.quests
         }
 
 
@@ -48,6 +52,7 @@ class GameState:
     tick: int = 0
     last_tick_time: float = 0.0
     tick_interval: float = 0.1
+    items: List[dict] = field(default_factory=list)  # Предметы на земле
 
     def __post_init__(self):
         if not self.map_data:
@@ -171,5 +176,6 @@ class GameState:
                 "height": self.map_height,
                 "tiles": self.map_data,
                 "heightMap": self.height_map
-            }
+            },
+            "items": self.items  # Отправляем предметы на земле
         }
