@@ -492,8 +492,36 @@ function updateGameExtra(deltaTime) {
     // Обновление сущностей
     entityManager.update(deltaTime, localPlayer);
     
+    // Обновление частиц
+    if (typeof particleSystem !== 'undefined') {
+        particleSystem.update(deltaTime);
+    }
+    
     // Автоматический подбор предметов поблизости
     pickupItems();
+}
+
+// Атака цели
+function attackTarget(target) {
+    if (!localPlayer || isDead || attackCooldown > 0) return false;
+    
+    const dist = ((localPlayer.x - target.x)**2 + (localPlayer.y - target.y)**2)**0.5;
+    if (dist > 3.0) return false;
+    
+    const damage = 10;
+    network.attack(target.id, damage);
+    attackCooldown = ATTACK_COOLDOWN_TIME;
+    
+    // Звуковой эффект и частицы
+    if (typeof audioSystem !== 'undefined') {
+        audioSystem.playAttack();
+    }
+    if (typeof particleSystem !== 'undefined') {
+        particleSystem.spawnHitEffect(target.x, target.y, '#ff4444');
+    }
+    
+    showNotification(`Атака! Урон: ${damage}`, 'damage');
+    return true;
 }
 
 // Глобальные обработчики событий

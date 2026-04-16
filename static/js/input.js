@@ -7,8 +7,9 @@ class InputHandler {
         this.detectMobile();
         this.setupKeyboard();
         this.setupTouch();
+        this.setupMouse();
     }
-
+    
     detectMobile() {
         this.isMobile = ("ontouchstart" in window) ||
                         (navigator.maxTouchPoints > 0) ||
@@ -55,6 +56,18 @@ class InputHandler {
             btn.addEventListener("mousedown", activate);
             btn.addEventListener("mouseup", deactivate);
             btn.addEventListener("mouseleave", deactivate);
+        });
+    }
+    
+    setupMouse() {
+        // Обработка клика мыши для атаки
+        window.addEventListener("mousedown", (e) => {
+            if (e.button === 0 && typeof attackTarget !== 'undefined') { // ЛКМ
+                const target = getNearestEnemy();
+                if (target) {
+                    attackTarget(target);
+                }
+            }
         });
     }
 
