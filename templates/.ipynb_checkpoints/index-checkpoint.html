@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Isometric Game</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="hud">
+        <div id="coords">X: 0, Y: 0</div>
+        <div id="fps">FPS: 0</div>
+    </div>
+    <div id="mobileControls">
+        <div class="d-pad">
+            <button id="btnUp" class="d-btn" aria-label="Up">&#9650;</button>
+            <button id="btnLeft" class="d-btn" aria-label="Left">&#9664;</button>
+            <button id="btnRight" class="d-btn" aria-label="Right">&#9654;</button>
+            <button id="btnDown" class="d-btn" aria-label="Down">&#9660;</button>
+        </div>
+    </div>
+    <script src="/static/js/iso.js"></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/entities.js"></script>
+    <script src="/static/js/input.js"></script>
+    <script src="/static/js/camera.js"></script>
+    <script src="/static/js/renderer.js"></script>
+    <script src="/static/js/game.js"></script>
+</body>
+</html>
