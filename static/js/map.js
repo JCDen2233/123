@@ -5,6 +5,9 @@ const TILE_PATH = 3;
 const TILE_TREE = 4;
 const TILE_SAND = 5;
 
+const MAX_HEIGHT = 8;
+let heightMap = [];
+
 const TILE_COLORS = {
     [TILE_GRASS]: { top: "#4a7c59", left: "#3d6b4e", right: "#3a6347" },
     [TILE_WATER]: { top: "#4a90d9", left: "#3a7bc8", right: "#3570b8" },
@@ -22,6 +25,13 @@ function initMapFromData(map) {
     MAP_WIDTH = map.width || 20;
     MAP_HEIGHT = map.height || 20;
     mapData = map.tiles || [];
+    
+    // Инициализация или загрузка карты высот
+    if (map.heightMap && map.heightMap.length > 0) {
+        heightMap = map.heightMap;
+    } else {
+        heightMap = generateHeightMap(MAP_WIDTH, MAP_HEIGHT);
+    }
 }
 
 const defaultMap = [

@@ -22,6 +22,8 @@ class Player:
     frame: int
     hp: int = 100
     max_hp: int = 100
+    inventory: list = field(default_factory=list)
+    quests: list = field(default_factory=list)
 
     def to_dict(self):
         return {
@@ -34,7 +36,9 @@ class Player:
             "state": self.state,
             "frame": self.frame,
             "hp": self.hp,
-            "max_hp": self.max_hp
+            "max_hp": self.max_hp,
+            "inventory": self.inventory,
+            "quests": self.quests
         }
 
 
@@ -44,13 +48,17 @@ class GameState:
     map_data: List[List[int]] = field(default_factory=list)
     map_width: int = 0
     map_height: int = 0
+    height_map: List[List[int]] = field(default_factory=list)
     tick: int = 0
     last_tick_time: float = 0.0
     tick_interval: float = 0.1
+    items: List[dict] = field(default_factory=list)  # Предметы на земле
 
     def __post_init__(self):
         if not self.map_data:
             self.load_default_map()
+        if not self.height_map:
+            self.generate_height_map()
 
     def load_default_map(self):
         map_path = os.path.join(MAPS_DIR, "default.json")
@@ -60,6 +68,79 @@ class GameState:
                 self.map_data = data.get("tiles", [])
                 self.map_width = data.get("width", len(self.map_data[0]) if self.map_data else 0)
                 self.map_height = data.get("height", len(self.map_data))
+
+    def generate_height_map(self):
+        """Генерация начальной карты высот с использованием простого шума"""
+        import random
+        random.seed(42)  # Фиксированное зерно для воспроизводимости
+        
+        self.height_map = [[0 for _ in range(self.map_width)] for _ in range(self.map_height)]
+        
+        max_height = 8
+        
+        # Добавление случайных холмов
+        num_hills = (self.map_width * self.map_height) // 20
+        for _ in range(num_hills):
+            cx = random.randint(0, self.map_width - 1)
+            cy = random.randint(0, self.map_height - 1)
+            radius = random.randint(2, 5)
+            delta = random.randint(1, 3)
+            self._apply_hill(cx, cy, radius, delta, max_height)
+        
+        # Добавление впадин
+        num_pits = (self.map_width * self.map_height) // 40
+        for _ in range(num_pits):
+            cx = random.randint(0, self.map_width - 1)
+            cy = random.randint(0, self.map_height - 1)
+            radius = random.randint(1, 3)
+            delta = random.randint(1, 2)
+            self._apply_pit(cx, cy, radius, delta)
+
+    def _apply_hill(self, cx, cy, radius, delta, max_height):
+        """Применение холма к карте высот"""
+        for y in range(max(0, cy - radius), min(self.map_height, cy + radius + 1)):
+            for x in range(max(0, cx - radius), min(self.map_width, cx + radius + 1)):
+                dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+                if dist <= radius:
+                    falloff = 1 - (dist / radius)
+                    increase = int(delta * falloff)
+                    self.height_map[y][x] = min(max_height, self.height_map[y][x] + increase)
+
+    def _apply_pit(self, cx, cy, radius, delta):
+        """Применение впадины к карте высот"""
+        for y in range(max(0, cy - radius), min(self.map_height, cy + radius + 1)):
+            for x in range(max(0, cx - radius), min(self.map_width, cx + radius + 1)):
+                dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+                if dist <= radius:
+                    falloff = 1 - (dist / radius)
+                    decrease = int(delta * falloff)
+                    self.height_map[y][x] = max(0, self.height_map[y][x] - decrease)
+
+    def modify_terrain(self, terrain_type, x, y, radius, elevation_change):
+        """Изменение рельефа на основе типа инструмента"""
+        max_height = 8
+        
+        if terrain_type == "hill":
+            self._apply_hill(x, y, radius, elevation_change, max_height)
+        elif terrain_type == "pit":
+            self._apply_pit(x, y, radius, elevation_change)
+        elif terrain_type == "water":
+            self._flatten_terrain(x, y, radius, 0)
+        else:
+            return False
+        
+        return True
+
+    def _flatten_terrain(self, cx, cy, radius, target_height):
+        """Выравнивание рельефа до целевой высоты"""
+        for y in range(max(0, cy - radius), min(self.map_height, cy + radius + 1)):
+            for x in range(max(0, cx - radius), min(self.map_width, cx + radius + 1)):
+                dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
+                if dist <= radius:
+                    falloff = 1 - (dist / radius)
+                    current = self.height_map[y][x]
+                    delta = (target_height - current) * falloff
+                    self.height_map[y][x] = max(0, min(8, int(current + delta)))
 
     def add_player(self, player: Player):
         self.players[player.id] = player
@@ -93,6 +174,8 @@ class GameState:
             "map": {
                 "width": self.map_width,
                 "height": self.map_height,
-                "tiles": self.map_data
-            }
+                "tiles": self.map_data,
+                "heightMap": self.height_map
+            },
+            "items": self.items  # Отправляем предметы на земле
         }

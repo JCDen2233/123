@@ -31,9 +31,18 @@ class Renderer {
         return this.isMobile ? 4 : 6;
     }
 
-    drawTile(x, y, tileType, cameraOffset) {
+    drawTile(x, y, tileType, cameraOffset, elevation = 0) {
         const pos = gridToScreen(x, y, cameraOffset.x, cameraOffset.y);
         const colors = TILE_COLORS[tileType] || TILE_COLORS[TILE_GRASS];
+        const isWater = tileType === TILE_WATER;
+        
+        // Применение коррекции цвета на основе высоты
+        const adjustedColors = {
+            top: getElevationColor(colors.top, elevation, isWater),
+            left: getElevationColor(colors.left, elevation, isWater),
+            right: getElevationColor(colors.right, elevation, isWater)
+        };
+        
         const halfW = TILE_W / 2;
         const halfH = TILE_H / 2;
         const depth = this.getTileDepth();
@@ -45,7 +54,7 @@ class Renderer {
         ctx.lineTo(pos.x, pos.y + halfH);
         ctx.lineTo(pos.x - halfW, pos.y);
         ctx.closePath();
-        ctx.fillStyle = colors.top;
+        ctx.fillStyle = adjustedColors.top;
         ctx.fill();
         ctx.strokeStyle = "rgba(0,0,0,0.15)";
         ctx.lineWidth = 0.5;
@@ -57,7 +66,7 @@ class Renderer {
         ctx.lineTo(pos.x, pos.y + halfH + depth);
         ctx.lineTo(pos.x - halfW, pos.y + depth);
         ctx.closePath();
-        ctx.fillStyle = colors.left;
+        ctx.fillStyle = adjustedColors.left;
         ctx.fill();
         ctx.stroke();
 
@@ -67,7 +76,7 @@ class Renderer {
         ctx.lineTo(pos.x, pos.y + halfH + depth);
         ctx.lineTo(pos.x + halfW, pos.y + depth);
         ctx.closePath();
-        ctx.fillStyle = colors.right;
+        ctx.fillStyle = adjustedColors.right;
         ctx.fill();
         ctx.stroke();
     }
@@ -150,7 +159,8 @@ class Renderer {
     drawMap(cameraOffset) {
         for (let y = 0; y < MAP_HEIGHT; y++) {
             for (let x = 0; x < MAP_WIDTH; x++) {
-                this.drawTile(x, y, mapData[y][x], cameraOffset);
+                const elevation = heightMap[y] && heightMap[y][x] ? heightMap[y][x] : 0;
+                this.drawTile(x, y, mapData[y][x], cameraOffset, elevation);
             }
         }
     }

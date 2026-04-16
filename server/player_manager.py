@@ -13,16 +13,20 @@ class PlayerManager:
     def __init__(self, game_state: GameState):
         self.game_state = game_state
 
-    def register_player(self, session_id: str, nickname: str, color: str = None) -> Player:
+    def register_player(self, session_id: str, nickname: str, color: str = None, 
+                       x: float = 2.0, y: float = 2.0, hp: int = 100, max_hp: int = 100,
+                       inventory: list = None, quests: list = None) -> Player:
         if color is None:
             color = random.choice(self.COLORS)
         
-        spawn_x = 2.0
-        spawn_y = 2.0
+        spawn_x = x
+        spawn_y = y
 
-        while self._is_occupied(spawn_x, spawn_y):
-            spawn_x = random.uniform(1, min(10, self.game_state.map_width - 1))
-            spawn_y = random.uniform(1, min(10, self.game_state.map_height - 1))
+        # Если позиция передана из БД, используем её, иначе ищем свободное место
+        if x == 2.0 and y == 2.0:  # Дефолтная позиция, ищем свободную
+            while self._is_occupied(spawn_x, spawn_y):
+                spawn_x = random.uniform(1, min(10, self.game_state.map_width - 1))
+                spawn_y = random.uniform(1, min(10, self.game_state.map_height - 1))
 
         player = Player(
             id=session_id,
@@ -34,8 +38,16 @@ class PlayerManager:
             target_y=spawn_y,
             direction=0,
             state="idle",
-            frame=0
+            frame=0,
+            hp=hp,
+            max_hp=max_hp
         )
+        
+        # Сохраняем инвентарь и квесты в объекте игрока (если нужно расширить Player)
+        if inventory:
+            player.inventory = inventory
+        if quests:
+            player.quests = quests
 
         self.game_state.add_player(player)
         return player

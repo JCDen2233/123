@@ -1,5 +1,6 @@
 class Player {
     constructor(x, y, nickname, color) {
+        this.id = null; // Будет установлен при получении данных от сервера
         this.x = x;
         this.y = y;
         this.targetX = x;
@@ -12,6 +13,8 @@ class Player {
         this.frameTimer = 0;
         this.moveSpeed = 3.0;
         this.isMoving = false;
+        this.hp = 100;
+        this.maxHp = 100;
     }
 
     getGridX() {
