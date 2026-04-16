@@ -35,6 +35,16 @@ const btnHill = document.getElementById("btnHill");
 const btnPit = document.getElementById("btnPit");
 const btnWater = document.getElementById("btnWater");
 const toolStatus = document.getElementById("toolStatus");
+const btnSettings = document.getElementById("btnSettings");
+
+// Элементы настроек
+const settingsPanel = document.getElementById("settingsPanel");
+const loadingScreen = document.getElementById("loadingScreen");
+const btnCloseSettings = document.getElementById("btnCloseSettings");
+const volumeSlider = document.getElementById("volumeSlider");
+const cameraSensitivity = document.getElementById("cameraSensitivity");
+const volumeValue = document.getElementById("volumeValue");
+const sensitivityValue = document.getElementById("sensitivityValue");
 
 // Игровые системы Этапа 5
 let inventory = null;
@@ -45,6 +55,12 @@ let respawnTimer = 0;
 let attackCooldown = 0;
 const ATTACK_COOLDOWN_TIME = 0.5;
 const RESPAWN_TIME = 5;
+
+// Настройки игры
+let gameSettings = {
+    volume: 50,
+    cameraSensitivity: 5
+};
 
 // Менеджер сущностей
 const entityManager = new EntityManager();
@@ -81,8 +97,16 @@ function init() {
     btnPit.addEventListener("click", () => selectTool(TerrainType.PIT));
     btnWater.addEventListener("click", () => selectTool(TerrainType.WATER));
     
+    // Кнопка настроек
+    if (btnSettings) {
+        btnSettings.addEventListener("click", openSettings);
+    }
+    
     // Клик мышью для редактирования рельефа
     canvas.addEventListener("click", handleCanvasClick);
+    
+    // Обработчики настроек
+    initSettingsHandlers();
     
     requestAnimationFrame(gameLoop);
 }
@@ -233,6 +257,50 @@ function sendMessage() {
             network.sendChat(msg);
         }
         chatInput.value = "";
+    }
+}
+
+// Инициализация обработчиков настроек
+function initSettingsHandlers() {
+    // Кнопка закрытия настроек
+    if (btnCloseSettings) {
+        btnCloseSettings.addEventListener("click", () => {
+            settingsPanel.classList.add("hidden");
+        });
+    }
+    
+    // Ползунок громкости
+    if (volumeSlider) {
+        volumeSlider.addEventListener("input", (e) => {
+            gameSettings.volume = parseInt(e.target.value);
+            volumeValue.textContent = gameSettings.volume + "%";
+            if (typeof audioSystem !== 'undefined') {
+                audioSystem.setVolume(gameSettings.volume / 100);
+            }
+        });
+    }
+    
+    // Ползунок чувствительности камеры
+    if (cameraSensitivity) {
+        cameraSensitivity.addEventListener("input", (e) => {
+            gameSettings.cameraSensitivity = parseInt(e.target.value);
+            sensitivityValue.textContent = gameSettings.cameraSensitivity;
+            camera.setSensitivity(gameSettings.cameraSensitivity);
+        });
+    }
+    
+    // Скрыть экран загрузки после инициализации
+    if (loadingScreen) {
+        setTimeout(() => {
+            loadingScreen.style.display = "none";
+        }, 1000);
+    }
+}
+
+// Показать панель настроек
+function openSettings() {
+    if (settingsPanel) {
+        settingsPanel.classList.remove("hidden");
     }
 }
 

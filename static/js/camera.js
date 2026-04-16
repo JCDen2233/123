@@ -5,6 +5,17 @@ class Camera {
         this.targetX = 0;
         this.targetY = 0;
         this.lerpFactor = 0.08;
+        this.sensitivity = 5;
+    }
+    
+    setSensitivity(value) {
+        this.sensitivity = value;
+        // Преобразование чувствительности в коэффициент плавности (1-10 -> 0.02-0.15)
+        this.lerpFactor = 0.02 + (value - 1) * (0.13 / 9);
+    }
+    
+    getLerpFactor() {
+        return this.lerpFactor;
     }
 
     follow(entity, deltaTime) {
