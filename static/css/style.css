@@ -283,3 +283,58 @@ html, body {
         transition: none;
     }
 }
+
+#terrainTools {
+    display: none;
+    position: fixed;
+    top: max(60px, env(safe-area-inset-top));
+    right: env(safe-area-inset-right);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    z-index: 25;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.tool-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    margin-bottom: 6px;
+    background: #4a90d9;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.tool-btn:hover {
+    background: #5aa3ea;
+}
+
+.tool-btn.active {
+    background: #4fc3f7;
+    box-shadow: 0 0 8px rgba(79, 195, 247, 0.6);
+}
+
+.tool-btn:last-child {
+    margin-bottom: 0;
+}
+
+#toolStatus {
+    display: block;
+    color: #aaa;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 8px;
+    font-family: 'Courier New', monospace;
+}
+
+@media (min-width: 769px) and (hover: hover) {
+    #terrainTools {
+        display: block;
+    }
+}

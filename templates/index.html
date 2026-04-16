@@ -36,7 +36,15 @@
         <input type="text" id="chatInput" placeholder="Type message..." maxlength="100">
         <button id="sendBtn">Send</button>
     </div>
+    <div id="terrainTools">
+        <button id="btnHill" class="tool-btn">Hill</button>
+        <button id="btnPit" class="tool-btn">Pit</button>
+        <button id="btnWater" class="tool-btn">Water</button>
+        <span id="toolStatus">Select tool</span>
+    </div>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="/static/js/heightmap.js"></script>
+    <script src="/static/js/terrainBuilder.js"></script>
     <script src="/static/js/iso.js"></script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/entities.js"></script>

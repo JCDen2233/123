@@ -11,6 +11,11 @@ let remotePlayers = new Map();
 let entities = [];
 let isJoined = false;
 
+// Terrain tools state
+let selectedTool = null;
+const TERRAIN_RADIUS = 3;
+const ELEVATION_CHANGE = 2;
+
 let lastTime = performance.now();
 let fps = 0;
 let frameCount = 0;
@@ -23,6 +28,12 @@ const chatContainer = document.getElementById("chatContainer");
 const chatMessages = document.getElementById("chatMessages");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
+
+// Terrain tool buttons
+const btnHill = document.getElementById("btnHill");
+const btnPit = document.getElementById("btnPit");
+const btnWater = document.getElementById("btnWater");
+const toolStatus = document.getElementById("toolStatus");
 
 function init() {
     window.addEventListener("resize", () => renderer.resize());
@@ -40,8 +51,17 @@ function init() {
     network.setInitCallback(handleInit);
     network.setStateCallback(handleStateUpdate);
     network.setChatCallback(handleChatMessage);
+    network.setTerrainUpdateCallback(handleTerrainUpdate);
     
     network.connect();
+    
+    // Terrain tool event listeners
+    btnHill.addEventListener("click", () => selectTool(TerrainType.HILL));
+    btnPit.addEventListener("click", () => selectTool(TerrainType.PIT));
+    btnWater.addEventListener("click", () => selectTool(TerrainType.WATER));
+    
+    // Mouse click for terrain editing
+    canvas.addEventListener("click", handleCanvasClick);
     
     requestAnimationFrame(gameLoop);
 }
@@ -136,6 +156,55 @@ function sendMessage() {
     if (msg) {
         network.sendChat(msg);
         chatInput.value = "";
+    }
+}
+
+function selectTool(toolType) {
+    selectedTool = toolType;
+    
+    // Update UI
+    btnHill.classList.remove("active");
+    btnPit.classList.remove("active");
+    btnWater.classList.remove("active");
+    
+    switch (toolType) {
+        case TerrainType.HILL:
+            btnHill.classList.add("active");
+            toolStatus.textContent = "Building hills...";
+            break;
+        case TerrainType.PIT:
+            btnPit.classList.add("active");
+            toolStatus.textContent = "Digging pits...";
+            break;
+        case TerrainType.WATER:
+            btnWater.classList.add("active");
+            toolStatus.textContent = "Creating water...";
+            break;
+    }
+}
+
+function handleCanvasClick(event) {
+    if (!selectedTool || !isJoined) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const screenX = event.clientX - rect.left;
+    const screenY = event.clientY - rect.top;
+    
+    // Convert screen coordinates to grid coordinates
+    const cameraOffset = camera.getOffset();
+    const gridPos = screenToGrid(screenX, screenY, cameraOffset.x, cameraOffset.y);
+    
+    const gridX = Math.round(gridPos.x);
+    const gridY = Math.round(gridPos.y);
+    
+    if (gridX >= 0 && gridX < MAP_WIDTH && gridY >= 0 && gridY < MAP_HEIGHT) {
+        network.buildTerrain(selectedTool, gridX, gridY, TERRAIN_RADIUS, ELEVATION_CHANGE);
+    }
+}
+
+function handleTerrainUpdate(data) {
+    if (data.heightMap) {
+        heightMap = data.heightMap;
     }
 }
 

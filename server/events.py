@@ -1,4 +1,5 @@
-from flask_socketio import SocketIO, emit, request
+from flask_socketio import SocketIO, emit
+from flask import request
 from server.game_state import GameState, Player
 from server.player_manager import PlayerManager
 import uuid
@@ -59,5 +60,18 @@ def init_socketio(app, socketio: SocketIO):
                 "message": message
             }
             emit("chat_message", chat_data, broadcast=True)
+
+    @socketio.on("build_terrain")
+    def handle_build_terrain(data):
+        terrain_type = data.get("type", "hill")
+        x = int(data.get("x", 0))
+        y = int(data.get("y", 0))
+        radius = int(data.get("radius", 3))
+        elevation_change = int(data.get("elevation_change", 2))
+        
+        success = game_state.modify_terrain(terrain_type, x, y, radius, elevation_change)
+        
+        if success:
+            emit("terrain_update", {"heightMap": game_state.height_map}, broadcast=True)
 
     return game_state

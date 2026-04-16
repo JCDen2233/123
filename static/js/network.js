@@ -6,6 +6,7 @@ class NetworkManager {
         this.remotePlayers = new Map();
         this.stateCallback = null;
         this.initCallback = null;
+        this.terrainUpdateCallback = null;
     }
 
     connect() {
@@ -48,6 +49,12 @@ class NetworkManager {
                 this.chatCallback(data);
             }
         });
+
+        this.socket.on("terrain_update", (data) => {
+            if (this.terrainUpdateCallback) {
+                this.terrainUpdateCallback(data);
+            }
+        });
     }
 
     join(nickname, color) {
@@ -57,6 +64,12 @@ class NetworkManager {
     move(x, y, direction, state, frame) {
         if (this.connected) {
             this.socket.emit("move", { x, y, direction, state, frame });
+        }
+    }
+
+    buildTerrain(type, x, y, radius, elevationChange) {
+        if (this.connected) {
+            this.socket.emit("build_terrain", { type, x, y, radius, elevationChange });
         }
     }
 
@@ -76,5 +89,9 @@ class NetworkManager {
 
     setChatCallback(callback) {
         this.chatCallback = callback;
+    }
+
+    setTerrainUpdateCallback(callback) {
+        this.terrainUpdateCallback = callback;
     }
 }
