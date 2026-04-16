@@ -42,6 +42,33 @@
         <button id="btnWater" class="tool-btn">Water</button>
         <span id="toolStatus">Select tool</span>
     </div>
+    <div id="connectionStatus" class="hidden">
+        <span id="connectionIndicator"></span>
+        <span id="connectionText">Connecting...</span>
+    </div>
+    <div id="settingsPanel" class="ui-panel hidden">
+        <h3>Настройки</h3>
+        <div class="setting-row">
+            <label for="volumeSlider">Громкость:</label>
+            <input type="range" id="volumeSlider" min="0" max="100" value="50">
+            <span id="volumeValue">50%</span>
+        </div>
+        <div class="setting-row">
+            <label for="cameraSensitivity">Чувствительность камеры:</label>
+            <input type="range" id="cameraSensitivity" min="1" max="10" value="5">
+            <span id="sensitivityValue">5</span>
+        </div>
+        <button id="btnCloseSettings">Закрыть</button>
+    </div>
+    <div id="loadingScreen">
+        <div class="loading-box">
+            <h2>Загрузка...</h2>
+            <div class="loading-bar">
+                <div id="loadingProgress" class="loading-progress"></div>
+            </div>
+            <p id="loadingText">Инициализация...</p>
+        </div>
+    </div>
     <div id="gameUI">
         <!-- Инвентарь -->
         <div id="inventoryContainer" class="ui-panel hidden">
@@ -77,11 +104,14 @@
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
     <script src="/static/js/heightmap.js"></script>
     <script src="/static/js/terrainBuilder.js"></script>
+    <script src="/static/js/mapEditor.js"></script>
     <script src="/static/js/iso.js"></script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/entities.js"></script>
     <script src="/static/js/entities_extra.js"></script>
     <script src="/static/js/inventory.js"></script>
+    <script src="/static/js/particles.js"></script>
+    <script src="/static/js/audio.js"></script>
     <script src="/static/js/input.js"></script>
     <script src="/static/js/camera.js"></script>
     <script src="/static/js/renderer.js"></script>

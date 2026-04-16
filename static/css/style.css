@@ -682,3 +682,264 @@ html, body {
         bottom: 80px;
     }
 }
+
+/* Индикатор соединения */
+#connectionStatus {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    color: #fff;
+    z-index: 100;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#connectionStatus.hidden {
+    display: none !important;
+}
+
+#connectionIndicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffd700;
+    animation: pulse 1.5s infinite;
+}
+
+#connectionStatus.connected #connectionIndicator {
+    background: #4ecdc4;
+    animation: none;
+}
+
+#connectionStatus.disconnected #connectionIndicator {
+    background: #ff4444;
+    animation: blink 0.5s infinite;
+}
+
+#connectionStatus.reconnecting #connectionIndicator {
+    background: #ffa500;
+    animation: pulse 0.8s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Настройки */
+#settingsPanel {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 350px;
+    z-index: 150;
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.setting-row label {
+    min-width: 180px;
+    font-size: 14px;
+    color: #ddd;
+}
+
+.setting-row input[type="range"] {
+    flex: 1;
+    height: 6px;
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    outline: none;
+}
+
+.setting-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #4fc3f7;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.setting-row input[type="range"]::-webkit-slider-thumb:hover {
+    background: #81d4fa;
+}
+
+.setting-row span {
+    min-width: 40px;
+    text-align: right;
+    font-size: 13px;
+    color: #4fc3f7;
+}
+
+#btnCloseSettings {
+    width: 100%;
+    padding: 10px;
+    background: #4a4a6e;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+#btnCloseSettings:hover {
+    background: #5a5a7e;
+}
+
+/* Экран загрузки */
+#loadingScreen {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 26, 46, 0.98);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+#loadingScreen.hidden {
+    display: none !important;
+}
+
+.loading-box {
+    text-align: center;
+    padding: 40px;
+}
+
+.loading-box h2 {
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 24px;
+    font-size: 24px;
+}
+
+.loading-bar {
+    width: 300px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0 auto 16px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.loading-progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #4fc3f7, #4ecdc4);
+    transition: width 0.3s ease-out;
+    border-radius: 8px;
+}
+
+#loadingText {
+    color: #aaa;
+    font-size: 14px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Редактор карт */
+#mapEditorPanel {
+    top: 100px;
+    left: 20px;
+    min-width: 280px;
+    z-index: 60;
+}
+
+.tile-palette {
+    display: grid;
+    grid-template-columns: repeat(4, 48px);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.tile-btn {
+    width: 48px;
+    height: 48px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.tile-btn:hover {
+    border-color: #4fc3f7;
+    transform: scale(1.1);
+}
+
+.tile-btn.selected {
+    border-color: #ffd700;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+    transform: scale(1.15);
+}
+
+.editor-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tool-btn.danger {
+    background: #ff4444;
+}
+
+.tool-btn.danger:hover {
+    background: #ff6b6b;
+}
+
+#editorStatus {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 12px;
+    color: #aaa;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    #settingsPanel {
+        min-width: 90vw;
+    }
+    
+    #mapEditorPanel {
+        top: 60px;
+        left: 10px;
+        right: 10px;
+        min-width: auto;
+    }
+    
+    .tile-palette {
+        grid-template-columns: repeat(4, 40px);
+    }
+    
+    .tile-btn {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .loading-bar {
+        width: 250px;
+    }
+}

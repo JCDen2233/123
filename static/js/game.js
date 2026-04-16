@@ -57,6 +57,9 @@ function init() {
     window.addEventListener("resize", () => renderer.resize());
     renderer.resize();
     
+    // Инициализация редактора карт
+    mapEditor = initMapEditor(canvas, renderer);
+    
     joinBtn.addEventListener("click", handleJoin);
     nicknameInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") handleJoin();
@@ -325,6 +328,11 @@ function render() {
     // Отрисовка всех сущностей (игроки + NPC + мобы + предметы)
     const allEntities = [...entities, ...entityManager.getAllEntities()];
     renderer.drawAllEntities(allEntities, offset);
+    
+    // Отрисовка частиц
+    if (typeof particleSystem !== 'undefined') {
+        particleSystem.render(ctx, offset);
+    }
     
     // Отрисовка HUD
     if (isJoined && localPlayer) {

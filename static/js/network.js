@@ -8,19 +8,28 @@ class NetworkManager {
         this.initCallback = null;
         this.chatCallback = null;
         this.terrainUpdateCallback = null;
+        this.connectionStatus = 'disconnected';
     }
 
     connect() {
+        this.updateConnectionStatus('connecting');
         this.socket = io();
 
         this.socket.on("connect", () => {
             this.connected = true;
             console.log("Подключено к серверу");
+            this.updateConnectionStatus('connected');
         });
 
         this.socket.on("disconnect", () => {
             this.connected = false;
             console.log("Отключено от сервера");
+            this.updateConnectionStatus('disconnected');
+        });
+
+        this.socket.on("connect_error", (error) => {
+            console.error("Ошибка подключения:", error);
+            this.updateConnectionStatus('reconnecting');
         });
 
         this.socket.on("init", (data) => {
@@ -30,7 +39,7 @@ class NetworkManager {
             }
         });
 
-        this.socket.on(\"state\", (data) => {
+        this.socket.on("state", (data) => {
             // Обновление HP локального игрока
             if (this.stateCallback && data.players) {
                 const localPlayerData = data.players.find(p => p.id === this.myPlayerId);
@@ -63,6 +72,26 @@ class NetworkManager {
                 this.terrainUpdateCallback(data);
             }
         });
+    }
+
+    updateConnectionStatus(status) {
+        this.connectionStatus = status;
+        const statusEl = document.getElementById('connectionStatus');
+        const textEl = document.getElementById('connectionText');
+
+        if (statusEl && textEl) {
+            statusEl.classList.remove('hidden', 'connected', 'disconnected', 'reconnecting');
+
+            const statusTexts = {
+                'connecting': 'Connecting...',
+                'connected': 'Connected',
+                'disconnected': 'Disconnected',
+                'reconnecting': 'Reconnecting...'
+            };
+
+            statusEl.classList.add(status);
+            textEl.textContent = statusTexts[status] || status;
+        }
     }
 
     join(nickname, color) {
@@ -101,5 +130,11 @@ class NetworkManager {
 
     setTerrainUpdateCallback(callback) {
         this.terrainUpdateCallback = callback;
+    }
+
+    attack(targetId) {
+        if (this.connected) {
+            this.socket.emit("attack", { targetId });
+        }
     }
 }

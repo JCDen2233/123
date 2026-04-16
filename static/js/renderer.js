@@ -1,3 +1,4 @@
+// Оптимизированный рендерер с culling и кэшированием
 class Renderer {
     constructor(canvas, ctx) {
         this.canvas = canvas;
@@ -5,6 +6,10 @@ class Renderer {
         this.dpr = window.devicePixelRatio || 1;
         this.isMobile = false;
         this.detectMobile();
+        
+        // Кэш спрайтов для оптимизации
+        this.spriteCache = new Map();
+        this.visibleTiles = [];
     }
 
     detectMobile() {
@@ -157,21 +162,58 @@ class Renderer {
     }
 
     drawMap(cameraOffset) {
-        for (let y = 0; y < MAP_HEIGHT; y++) {
-            for (let x = 0; x < MAP_WIDTH; x++) {
+        // Оптимизация: отрисовка только видимых тайлов (culling)
+        const viewportWidth = window.innerWidth / this.dpr;
+        const viewportHeight = window.innerHeight / this.dpr;
+        
+        // Вычисляем границы видимой области в координатах сетки
+        const centerScreenX = viewportWidth / 2;
+        const centerScreenY = viewportHeight / 2;
+        
+        // Преобразуем центр экрана в координаты сетки
+        const centerGrid = screenToGrid(centerScreenX, centerScreenY, cameraOffset.x, cameraOffset.y);
+        
+        // Добавляем запас для видимой области
+        const marginX = Math.ceil(viewportWidth / TILE_W) + 2;
+        const marginY = Math.ceil(viewportHeight / TILE_H) + 2;
+        
+        const startX = Math.max(0, Math.floor(centerGrid.x - marginX));
+        const endX = Math.min(MAP_WIDTH, Math.ceil(centerGrid.x + marginX));
+        const startY = Math.max(0, Math.floor(centerGrid.y - marginY));
+        const endY = Math.min(MAP_HEIGHT, Math.ceil(centerGrid.y + marginY));
+        
+        this.visibleTiles = [];
+        
+        for (let y = startY; y < endY; y++) {
+            for (let x = startX; x < endX; x++) {
                 const elevation = heightMap[y] && heightMap[y][x] ? heightMap[y][x] : 0;
                 this.drawTile(x, y, mapData[y][x], cameraOffset, elevation);
+                this.visibleTiles.push({x, y});
             }
         }
     }
 
     drawAllEntities(entities, cameraOffset) {
+        // Оптимизация: отрисовка только видимых сущностей
+        const viewportWidth = window.innerWidth / this.dpr;
+        const viewportHeight = window.innerHeight / this.dpr;
+        
         const sorted = [...entities].sort((a, b) => {
-        return (a.x + a.y) - (b.x + b.y);
+            return (a.x + a.y) - (b.x + b.y);
         });
 
         for (const entity of sorted) {
-            this.drawPlayer(entity, cameraOffset);
+            // Проверка видимости сущности
+            const screenPos = gridToScreen(entity.x, entity.y, cameraOffset.x, cameraOffset.y);
+            if (screenPos.x >= -50 && screenPos.x <= viewportWidth + 50 &&
+                screenPos.y >= -50 && screenPos.y <= viewportHeight + 50) {
+                this.drawPlayer(entity, cameraOffset);
+            }
         }
+    }
+    
+    // Получение количества отрисованных тайлов (для отладки)
+    getVisibleTileCount() {
+        return this.visibleTiles.length;
     }
 }

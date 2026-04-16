@@ -185,13 +185,21 @@ def init_socketio(app, socketio: SocketIO):
         attacker = player_manager.game_state.get_player(request.sid)
         target = player_manager.game_state.get_entity(target_id)
         
-        if attacker and target:
-            target.take_damage(damage)
-            # Если моб умер, можно сохранить изменение состояния мира
-            if target.hp <= 0:
-                # Логика смерти моба
-                pass
-            
-            emit("state", game_state.broadcast_state(), broadcast=True)
+        if attacker and target and hasattr(target, 'hp'):
+            # Проверка расстояния до цели
+            dist = ((attacker.x - target.x)**2 + (attacker.y - target.y)**2)**0.5
+            if dist <= 3.0:  # Радиус атаки
+                target.hp -= damage
+                if target.hp < 0:
+                    target.hp = 0
+                
+                # Если моб умер, удаляем его
+                if isinstance(target, type(player_manager.game_state.mobs.get(target_id, None))):
+                    if target.hp <= 0:
+                        target.dead = True
+                        # Удаляем моба через некоторое время или сразу
+                        player_manager.game_state.remove_mob(target_id)
+                
+                emit("state", game_state.broadcast_state(), broadcast=True)
 
     return game_state
