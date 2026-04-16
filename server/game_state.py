@@ -60,6 +60,7 @@ class NPC:
     patrol_timer: float = 0.0
     patrol_wait_time: float = 2.0
     color: str = "#4ecdc4"
+    dead: bool = False
     
     def to_dict(self):
         return {
@@ -137,6 +138,10 @@ class GameState:
     items: List[dict] = field(default_factory=list)  # Предметы на земле
     next_npc_id: int = 0
     next_mob_id: int = 0
+    # Время в секундах (0-86400 = 24 часа), начинается с полудня
+    game_time: float = 12 * 3600
+    # Длительность игровых суток в реальных секундах
+    day_duration: float = 60
 
     def __post_init__(self):
         if not self.map_data:
@@ -433,6 +438,11 @@ class GameState:
             self.last_tick_time = 0.0
             self.tick += 1
             
+            # Обновление игрового времени
+            self.game_time += dt * (86400 / self.day_duration)
+            if self.game_time >= 86400:
+                self.game_time -= 86400
+            
             # Обновление ИИ NPC
             for npc in self.npcs.values():
                 self.update_npc_ai(npc, self.tick_interval)
@@ -448,6 +458,8 @@ class GameState:
         return {
             "tick": self.tick,
             "timestamp": time.time(),
+            "gameTime": self.game_time,
+            "dayDuration": self.day_duration,
             "players": [p.to_dict() for p in self.players.values()],
             "npcs": [n.to_dict() for n in self.npcs.values()],
             "mobs": [m.to_dict() for m in self.mobs.values()],

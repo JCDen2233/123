@@ -70,6 +70,59 @@ class HUDManager {
     }
     
     /**
+     * Отрисовка индикатора времени суток
+     */
+    drawTimeIndicator(ctx, timeManager) {
+        if (!timeManager) return;
+        
+        const x = this.canvas.width - 160;
+        const y = 45;
+        
+        // Фон
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(x, y, 150, 50);
+        
+        // Время
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px "Courier New", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(timeManager.getFormattedTime(), x + 75, y + 20);
+        
+        // Фаза
+        ctx.font = '12px "Courier New", monospace';
+        ctx.fillStyle = '#aaaaaa';
+        ctx.fillText(timeManager.getPhaseName(), x + 75, y + 38);
+        
+        // Индикатор освещения
+        const barWidth = 100;
+        const barHeight = 6;
+        const barX = x + 25;
+        const barY = y + 45;
+        
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+        
+        // Градиент от тёмного к светлому
+        const gradient = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+        gradient.addColorStop(0, '#1a1a2e');
+        gradient.addColorStop(0.5, '#f4a460');
+        gradient.addColorStop(1, '#87ceeb');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(barX, barY, barWidth, barHeight);
+        
+        // Текущий уровень
+        const currentWidth = barWidth * timeManager.lightLevel;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(barX, barY, currentWidth, barHeight);
+        
+        // Рамка
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(barX, barY, barWidth, barHeight);
+    }
+    
+    /**
      * Отрисовка полоски здоровья
      */
     drawHPBar(ctx, player) {

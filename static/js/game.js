@@ -65,6 +65,9 @@ let gameSettings = {
 // Менеджер сущностей
 const entityManager = new EntityManager();
 
+// Система времени суток
+let timeManager = null;
+
 // Горячие клавиши для быстрого доступа
 const hotbarSlots = [0, 1, 2, 3, 4];
 let selectedHotbarSlot = 0;
@@ -108,6 +111,9 @@ function init() {
     // Обработчики настроек
     initSettingsHandlers();
     
+    // Инициализация системы времени суток
+    timeManager = initTimeSystem();
+    
     requestAnimationFrame(gameLoop);
 }
 
@@ -141,12 +147,30 @@ function handleInit(data) {
     updateEntitiesList();
     isJoined = true;
     
+    // Синхронизация времени с сервером
+    if (timeManager && data.gameTime !== undefined) {
+        timeManager.currentTime = data.gameTime;
+        if (data.dayDuration !== undefined) {
+            timeManager.setDayDuration(data.dayDuration);
+        }
+        timeManager.updatePhase();
+    }
+    
     // Инициализация систем Этапа 5
     initInventory();
     initTestEntities();
 }
 
 function handleStateUpdate(data) {
+    // Синхронизация времени с сервером
+    if (timeManager && data.gameTime !== undefined) {
+        timeManager.currentTime = data.gameTime;
+        if (data.dayDuration !== undefined) {
+            timeManager.setDayDuration(data.dayDuration);
+        }
+        timeManager.updatePhase();
+    }
+    
     data.players.forEach(pData => {
         if (pData.id === network.myPlayerId) {
             if (localPlayer) {
@@ -386,12 +410,24 @@ function update(deltaTime) {
     
     // Обновление систем Этапа 5
     updateGameExtra(deltaTime);
+    
+    // Обновление системы времени суток
+    if (timeManager) {
+        timeManager.update(deltaTime);
+        timeManager.checkPhaseChange();
+    }
 }
 
 function render() {
     renderer.clear();
+    
+    // Отрисовка неба с учётом времени суток
+    if (timeManager) {
+        renderer.drawSky(timeManager);
+    }
+    
     const offset = camera.getOffset();
-    renderer.drawMap(offset);
+    renderer.drawMap(offset, timeManager);
     
     // Отрисовка всех сущностей (игроки + NPC + мобы + предметы)
     const allEntities = [...entities, ...entityManager.getAllEntities()];
@@ -404,7 +440,12 @@ function render() {
     
     // Отрисовка HUD
     if (isJoined && localPlayer) {
-        hud.render(localPlayer, remotePlayers, camera);
+        hud.render(localPlayer, remotePlayers, camera, timeManager);
+        
+        // Отрисовка индикатора времени
+        if (timeManager) {
+            hud.drawTimeIndicator(ctx, timeManager);
+        }
     }
 }
 
