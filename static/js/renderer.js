@@ -36,7 +36,7 @@ class Renderer {
         const colors = TILE_COLORS[tileType] || TILE_COLORS[TILE_GRASS];
         const isWater = tileType === TILE_WATER;
         
-        // Apply elevation-based color adjustment
+        // Применение коррекции цвета на основе высоты
         const adjustedColors = {
             top: getElevationColor(colors.top, elevation, isWater),
             left: getElevationColor(colors.left, elevation, isWater),

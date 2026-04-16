@@ -11,7 +11,7 @@ let remotePlayers = new Map();
 let entities = [];
 let isJoined = false;
 
-// Terrain tools state
+// Состояние инструментов рельефа
 let selectedTool = null;
 const TERRAIN_RADIUS = 3;
 const ELEVATION_CHANGE = 2;
@@ -29,7 +29,7 @@ const chatMessages = document.getElementById("chatMessages");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
 
-// Terrain tool buttons
+// Кнопки инструментов рельефа
 const btnHill = document.getElementById("btnHill");
 const btnPit = document.getElementById("btnPit");
 const btnWater = document.getElementById("btnWater");
@@ -55,12 +55,12 @@ function init() {
     
     network.connect();
     
-    // Terrain tool event listeners
+    // Обработчики событий инструментов рельефа
     btnHill.addEventListener("click", () => selectTool(TerrainType.HILL));
     btnPit.addEventListener("click", () => selectTool(TerrainType.PIT));
     btnWater.addEventListener("click", () => selectTool(TerrainType.WATER));
     
-    // Mouse click for terrain editing
+    // Клик мышью для редактирования рельефа
     canvas.addEventListener("click", handleCanvasClick);
     
     requestAnimationFrame(gameLoop);
@@ -162,7 +162,7 @@ function sendMessage() {
 function selectTool(toolType) {
     selectedTool = toolType;
     
-    // Update UI
+    // Обновление интерфейса
     btnHill.classList.remove("active");
     btnPit.classList.remove("active");
     btnWater.classList.remove("active");
@@ -170,15 +170,15 @@ function selectTool(toolType) {
     switch (toolType) {
         case TerrainType.HILL:
             btnHill.classList.add("active");
-            toolStatus.textContent = "Building hills...";
+            toolStatus.textContent = "Строительство холмов...";
             break;
         case TerrainType.PIT:
             btnPit.classList.add("active");
-            toolStatus.textContent = "Digging pits...";
+            toolStatus.textContent = "Копание впадин...";
             break;
         case TerrainType.WATER:
             btnWater.classList.add("active");
-            toolStatus.textContent = "Creating water...";
+            toolStatus.textContent = "Создание водоёма...";
             break;
     }
 }
@@ -190,7 +190,7 @@ function handleCanvasClick(event) {
     const screenX = event.clientX - rect.left;
     const screenY = event.clientY - rect.top;
     
-    // Convert screen coordinates to grid coordinates
+    // Преобразование экранных координат в координаты сетки
     const cameraOffset = camera.getOffset();
     const gridPos = screenToGrid(screenX, screenY, cameraOffset.x, cameraOffset.y);
     

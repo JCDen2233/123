@@ -14,12 +14,12 @@ class NetworkManager {
 
         this.socket.on("connect", () => {
             this.connected = true;
-            console.log("Connected to server");
+            console.log("Подключено к серверу");
         });
 
         this.socket.on("disconnect", () => {
             this.connected = false;
-            console.log("Disconnected from server");
+            console.log("Отключено от сервера");
         });
 
         this.socket.on("init", (data) => {
@@ -36,11 +36,11 @@ class NetworkManager {
         });
 
         this.socket.on("player_joined", (data) => {
-            console.log("Player joined:", data.nickname);
+            console.log("Игрок присоединился:", data.nickname);
         });
 
         this.socket.on("player_left", (data) => {
-            console.log("Player left:", data.id);
+            console.log("Игрок покинул игру:", data.id);
             this.remotePlayers.delete(data.id);
         });
 

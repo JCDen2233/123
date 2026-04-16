@@ -12,18 +12,18 @@ def init_socketio(app, socketio: SocketIO):
 
     @socketio.on("connect")
     def handle_connect():
-        print(f"Client connected: {request.sid}")
+        print(f"Клиент подключился: {request.sid}")
 
     @socketio.on("disconnect")
     def handle_disconnect():
-        print(f"Client disconnected: {request.sid}")
+        print(f"Клиент отключился: {request.sid}")
         if request.sid in players:
             player_manager.unregister_player(request.sid)
             emit("player_left", {"id": request.sid}, broadcast=True)
 
     @socketio.on("join")
     def handle_join(data):
-        nickname = data.get("nickname", "Player")
+        nickname = data.get("nickname", "Игрок")
         color = data.get("color")
         
         player = player_manager.register_player(request.sid, nickname, color)
@@ -34,7 +34,7 @@ def init_socketio(app, socketio: SocketIO):
         emit("init", init_state)
         
         emit("player_joined", player.to_dict(), broadcast=True)
-        print(f"Player joined: {nickname} ({request.sid})")
+        print(f"Игрок присоединился: {nickname} ({request.sid})")
 
     @socketio.on("move")
     def handle_move(data):

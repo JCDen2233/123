@@ -26,7 +26,7 @@ function initMapFromData(map) {
     MAP_HEIGHT = map.height || 20;
     mapData = map.tiles || [];
     
-    // Initialize or load heightmap
+    // Инициализация или загрузка карты высот
     if (map.heightMap && map.heightMap.length > 0) {
         heightMap = map.heightMap;
     } else {

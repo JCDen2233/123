@@ -1,10 +1,10 @@
-// Height map generation using simple noise
+// Генерация карты высот с использованием простого шума
 const MAX_HEIGHT = 8;
 
 function generateHeightMap(width, height, seed = Math.random()) {
     const heightMap = [];
     
-    // Initialize with base heights
+    // Инициализация базовых высот
     for (let y = 0; y < height; y++) {
         heightMap[y] = [];
         for (let x = 0; x < width; x++) {
@@ -12,10 +12,10 @@ function generateHeightMap(width, height, seed = Math.random()) {
         }
     }
     
-    // Simple pseudo-random noise generation
+    // Простая генерация псевдослучайного шума
     const random = seededRandom(seed);
     
-    // Add some base terrain features
+    // Добавление базовых элементов рельефа
     const numHills = Math.floor((width * height) / 20);
     for (let i = 0; i < numHills; i++) {
         const cx = Math.floor(random() * width);
@@ -25,7 +25,7 @@ function generateHeightMap(width, height, seed = Math.random()) {
         applyHill(heightMap, cx, cy, radius, delta, width, height);
     }
     
-    // Add some pits
+    // Добавление впадин
     const numPits = Math.floor((width * height) / 40);
     for (let i = 0; i < numPits; i++) {
         const cx = Math.floor(random() * width);
@@ -79,10 +79,10 @@ function getElevationColor(baseColor, elevation, isWater = false) {
     
     let factor;
     if (isWater) {
-        // Water gets darker with depth (lower elevation = deeper)
+        // Вода становится темнее с глубиной (ниже высота = глубже)
         factor = 0.7 + (elevation / MAX_HEIGHT) * 0.3;
     } else {
-        // Land gets slightly darker at higher elevations (shadows)
+        // Суша становится немного темнее на больших высотах (тени)
         factor = 1.0 - (elevation / MAX_HEIGHT) * 0.2;
     }
     

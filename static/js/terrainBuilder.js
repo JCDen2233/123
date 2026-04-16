@@ -1,4 +1,4 @@
-// Terrain building tools for modifying heightmap
+// Инструменты для изменения карты высот
 const TerrainType = {
     HILL: 'hill',
     PIT: 'pit',
@@ -14,11 +14,11 @@ function buildTerrain(heightMap, type, x, y, radius, elevationChange, width, hei
             applyPit(heightMap, x, y, radius, elevationChange, width, height);
             break;
         case TerrainType.WATER:
-            // Flatten and lower terrain for water body
+            // Выравнивание и понижение рельефа для водоёма
             flattenTerrain(heightMap, x, y, radius, 0, width, height);
             break;
         default:
-            console.warn('Unknown terrain type:', type);
+            console.warn('Неизвестный тип местности:', type);
     }
 }
 
@@ -44,7 +44,7 @@ function getTerrainAt(heightMap, x, y) {
 }
 
 function canBuildHere(heightMap, x, y, radius, width, height) {
-    // Check if the area is within bounds
+    // Проверка выхода за границы карты
     if (x - radius < 0 || x + radius >= width || y - radius < 0 || y + radius >= height) {
         return false;
     }
@@ -52,7 +52,7 @@ function canBuildHere(heightMap, x, y, radius, width, height) {
 }
 
 function previewTerrainChange(heightMap, type, x, y, radius, elevationChange, width, height) {
-    // Create a copy of the heightmap for preview
+    // Создание копии карты высот для предпросмотра
     const preview = heightMap.map(row => [...row]);
     buildTerrain(preview, type, x, y, radius, elevationChange, width, height);
     return preview;

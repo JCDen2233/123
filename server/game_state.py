@@ -65,15 +65,15 @@ class GameState:
                 self.map_height = data.get("height", len(self.map_data))
 
     def generate_height_map(self):
-        """Generate initial height map using simple noise"""
+        """Генерация начальной карты высот с использованием простого шума"""
         import random
-        random.seed(42)  # Fixed seed for consistency
+        random.seed(42)  # Фиксированное зерно для воспроизводимости
         
         self.height_map = [[0 for _ in range(self.map_width)] for _ in range(self.map_height)]
         
         max_height = 8
         
-        # Add some random hills
+        # Добавление случайных холмов
         num_hills = (self.map_width * self.map_height) // 20
         for _ in range(num_hills):
             cx = random.randint(0, self.map_width - 1)
@@ -82,7 +82,7 @@ class GameState:
             delta = random.randint(1, 3)
             self._apply_hill(cx, cy, radius, delta, max_height)
         
-        # Add some pits
+        # Добавление впадин
         num_pits = (self.map_width * self.map_height) // 40
         for _ in range(num_pits):
             cx = random.randint(0, self.map_width - 1)
@@ -92,7 +92,7 @@ class GameState:
             self._apply_pit(cx, cy, radius, delta)
 
     def _apply_hill(self, cx, cy, radius, delta, max_height):
-        """Apply a hill to the height map"""
+        """Применение холма к карте высот"""
         for y in range(max(0, cy - radius), min(self.map_height, cy + radius + 1)):
             for x in range(max(0, cx - radius), min(self.map_width, cx + radius + 1)):
                 dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
@@ -102,7 +102,7 @@ class GameState:
                     self.height_map[y][x] = min(max_height, self.height_map[y][x] + increase)
 
     def _apply_pit(self, cx, cy, radius, delta):
-        """Apply a pit to the height map"""
+        """Применение впадины к карте высот"""
         for y in range(max(0, cy - radius), min(self.map_height, cy + radius + 1)):
             for x in range(max(0, cx - radius), min(self.map_width, cx + radius + 1)):
                 dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
@@ -112,7 +112,7 @@ class GameState:
                     self.height_map[y][x] = max(0, self.height_map[y][x] - decrease)
 
     def modify_terrain(self, terrain_type, x, y, radius, elevation_change):
-        """Modify terrain based on tool type"""
+        """Изменение рельефа на основе типа инструмента"""
         max_height = 8
         
         if terrain_type == "hill":
@@ -127,7 +127,7 @@ class GameState:
         return True
 
     def _flatten_terrain(self, cx, cy, radius, target_height):
-        """Flatten terrain to a target height"""
+        """Выравнивание рельефа до целевой высоты"""
         for y in range(max(0, cy - radius), min(self.map_height, cy + radius + 1)):
             for x in range(max(0, cx - radius), min(self.map_width, cx + radius + 1)):
                 dist = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5
